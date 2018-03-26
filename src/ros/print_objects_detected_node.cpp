@@ -24,6 +24,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseArray.h>
+#include <eigen_conversions/eigen_msg.h>
+#include <Eigen/Dense>
+#include <mav_msgs/common.h>
+#include <mav_msgs/conversions.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 
 #include <ros/ros.h>
 #include <find_object_2d/ObjectsStamped.h>
@@ -37,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QColor>
 
 image_transport::Publisher imagePub;
+ros::Publisher pose_detection_pub;
 
 /**
  * IMPORTANT :
@@ -46,6 +54,9 @@ image_transport::Publisher imagePub;
 void objectsDetectedCallback(
 		const std_msgs::Float32MultiArrayConstPtr & msg)
 {
+	geometry_msgs::PoseStamped L_pose_detected_;
+  	geometry_msgs::PoseArray tag_pose_array;
+
 	printf("---\n");
 	const std::vector<float> & data = msg->data;
 	if(data.size())
@@ -73,12 +84,29 @@ void objectsDetectedCallback(
 					qtTopRight.x(), qtTopRight.y(),
 					qtBottomLeft.x(), qtBottomLeft.y(),
 					qtBottomRight.x(), qtBottomRight.y());
+			
+
+			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/1024-0.5)*4;
+			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/768-0.5)*4;
+			L_pose_detected_.pose.position.z = 2.5;
+			double idle_yaw_ = atan2(( qtTopLeft.y() - qtTopRight.y() ), ( qtTopLeft.x() - qtTopRight.x() ) );
+  			Eigen::Quaterniond idle_orien_ = mav_msgs::quaternionFromYaw(idle_yaw_);
+  			Eigen::Quaterniond idle_orien;
+  			tf::quaternionEigenToMsg(idle_orien_,L_pose_detected_.pose.orientation);
+
+
+
+    		tag_pose_array.poses.push_back(L_pose_detected_.pose);
+
+
+
 		}
 	}
 	else
 	{
 		printf("No objects detected.\n");
 	}
+	pose_detection_pub.publish(tag_pose_array);
 }
 void imageObjectsDetectedCallback(
 		const sensor_msgs::ImageConstPtr & imageMsg,
@@ -158,6 +186,7 @@ int main(int argc, char** argv)
     exactSync.registerCallback(boost::bind(&imageObjectsDetectedCallback, _1, _2));
 
     imagePub = it.advertise("image_with_objects", 1);
+	pose_detection_pub = nh.advertise<geometry_msgs::PoseArray>("Object/detection/pose",1);
 
     ros::spin();
 
