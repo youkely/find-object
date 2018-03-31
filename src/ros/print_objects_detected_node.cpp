@@ -31,6 +31,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <mav_msgs/common.h>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
+#include <nav_msgs/Odometry.h>
+
 
 #include <ros/ros.h>
 #include <find_object_2d/ObjectsStamped.h>
@@ -45,12 +47,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 image_transport::Publisher imagePub;
 ros::Publisher pose_detection_pub;
+Eigen::Vector3d L_p_LB_;                // Mav position in local coordinates.
 
 /**
  * IMPORTANT :
  *      Parameter General/MirrorView must be false
  *      Parameter Homography/homographyComputed must be true
  */
+void OdometryCallback(const nav_msgs::Odometry& msg)
+{
+  	Eigen::Affine3d T_LB;
+  	tf::poseMsgToEigen(msg.pose.pose, T_LB);
+  	L_p_LB_ = T_LB.translation();
+}
 void objectsDetectedCallback(
 		const std_msgs::Float32MultiArrayConstPtr & msg)
 {
@@ -85,10 +94,11 @@ void objectsDetectedCallback(
 					qtBottomLeft.x(), qtBottomLeft.y(),
 					qtBottomRight.x(), qtBottomRight.y());
 			
-
-			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/1024-0.5)*4;
-			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/768-0.5)*4;
-			L_pose_detected_.pose.position.z = 2.5;
+			float area = (qtTopLeft - qtTopRight).x() * (qtTopLeft - qtBottomLeft).y();
+			printf("area: %f", area);
+			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/1024-0.5)*L_p_LB_.z()*1.5;
+			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/768-0.5)*L_p_LB_.z()*1.5;
+			L_pose_detected_.pose.position.z = sqrt(4000 / area) * 2.5;
 			double idle_yaw_ = atan2(( qtTopLeft.y() - qtTopRight.y() ), ( qtTopLeft.x() - qtTopRight.x() ) );
   			Eigen::Quaterniond idle_orien_ = mav_msgs::quaternionFromYaw(idle_yaw_);
   			Eigen::Quaterniond idle_orien;
@@ -176,6 +186,7 @@ int main(int argc, char** argv)
     // Simple subscriber
     ros::Subscriber sub;
     sub = nh.subscribe("objects", 1, objectsDetectedCallback);
+	ros::Subscriber odometry_sub = nh.subscribe("/jay/rovio/odometry", 1, OdometryCallback);
 
     // Synchronized image + objects example
     image_transport::SubscriberFilter imageSub;
