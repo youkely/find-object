@@ -94,17 +94,17 @@ void objectsDetectedCallback(
 					qtBottomLeft.x(), qtBottomLeft.y(),
 					qtBottomRight.x(), qtBottomRight.y());
 			
-			//float area = (qtTopLeft - qtTopRight).x() * (qtTopLeft - qtBottomLeft).y();
-			//printf("area1: %f", area);
+			//float area0 = (qtTopLeft - qtTopRight).x() * (qtTopLeft - qtBottomLeft).y();
+			//printf("area1: %f", area0);
 
 			float x0 = qtTopLeft.x();
 			float x1 = qtTopRight.x();
 			float x2 = qtBottomRight.x();
 			float x3 = qtBottomLeft.x();
 			float y0 = qtTopLeft.y();
-			float y1 = qtTopRight.x();
-			float y2 = qtBottomRight.x();
-			float y3 = qtBottomLeft.x();
+			float y1 = qtTopRight.y();
+			float y2 = qtBottomRight.y();
+			float y3 = qtBottomLeft.y();
 			float x[4] = {x0,x1,x2,x3};
 			float y[4] = {y0,y1,y2,y3};
 		    float area = fabs(x[0]*y[1]-x[1]*y[0]+x[1]*y[2]-x[2]*y[1]+x[2]*y[3]-x[3]*y[2]+x[3]*y[0]-x[0]*y[3])/2;
