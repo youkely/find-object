@@ -110,8 +110,8 @@ void objectsDetectedCallback(
 		    float area = fabs(x[0]*y[1]-x[1]*y[0]+x[1]*y[2]-x[2]*y[1]+x[2]*y[3]-x[3]*y[2]+x[3]*y[0]-x[0]*y[3])/2;
 			printf("area: %f", area);
 			
-			float frameWidth = 1024;
-			float frameHeight = 768;
+			float frameWidth = 2048;//1024 for simulation
+			float frameHeight = 1536;//768 for simulation
 			float magnifyFactor = 1.5;
 			float heightFactor = sqrt(4000)*2.5;
 			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/frameWidth-0.5)*L_p_LB_.z()*magnifyFactor;
