@@ -114,9 +114,10 @@ void objectsDetectedCallback(
 			float frameHeight = 1738;//768 for simulation
 			float magnifyFactor = 1.5;
 			float heightFactor = sqrt(4000)*2.5;
-			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/frameWidth-0.5)*L_p_LB_.z()*magnifyFactor;
-			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/frameHeight-0.5)*L_p_LB_.z()*magnifyFactor;
-			L_pose_detected_.pose.position.z = sqrt(1 / area) * heightFactor;
+			float z_position = sqrt(1 / area) * heightFactor;
+			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/frameWidth-0.5)*z_position*magnifyFactor;
+			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/frameHeight-0.5)*z_position*magnifyFactor;
+			L_pose_detected_.pose.position.z = z_position;
 			//L_pose_detected_.pose.position.z = 2.5;
 			double idle_yaw_ = atan2(( qtTopLeft.y() - qtTopRight.y() ), ( qtTopLeft.x() - qtTopRight.x() ) );
   			Eigen::Quaterniond idle_orien_ = mav_msgs::quaternionFromYaw(idle_yaw_);
