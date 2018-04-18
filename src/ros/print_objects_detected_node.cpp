@@ -138,6 +138,8 @@ void objectsDetectedCallback(
 	}
 	pose_detection_pub.publish(tag_pose_array);
 }
+
+/*
 void imageObjectsDetectedCallback(
 		const sensor_msgs::ImageConstPtr & imageMsg,
 		const find_object_2d::ObjectsStampedConstPtr & objectsMsg)
@@ -193,6 +195,7 @@ void imageObjectsDetectedCallback(
 		}
 	}
 }
+*/
 
 typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, find_object_2d::ObjectsStamped> MyExactSyncPolicy;
 
@@ -213,10 +216,10 @@ int main(int argc, char** argv)
 	imageSub.subscribe(it, nh.resolveName("image"), 1);
 	message_filters::Subscriber<find_object_2d::ObjectsStamped> objectsSub;
 	objectsSub.subscribe(nh, "objectsStamped", 1);
-    message_filters::Synchronizer<MyExactSyncPolicy> exactSync(MyExactSyncPolicy(10), imageSub, objectsSub);
+    /*message_filters::Synchronizer<MyExactSyncPolicy> exactSync(MyExactSyncPolicy(10), imageSub, objectsSub);
     exactSync.registerCallback(boost::bind(&imageObjectsDetectedCallback, _1, _2));
 
-    imagePub = it.advertise("image_with_objects", 1);
+    imagePub = it.advertise("image_with_objects", 1);*/
 	pose_detection_pub = nh.advertise<geometry_msgs::PoseArray>("Object/detection/pose",1);
 
     ros::spin();
