@@ -113,7 +113,7 @@ void objectsDetectedCallback(
 			float frameWidth = 2788;//1024 for simulation
 			float frameHeight = 1738;//768 for simulation
 			float magnifyFactor = 1.5;
-			float heightFactor = sqrt(4000)*2.5;
+			float heightFactor = 350;
 			float z_position = sqrt(1 / area) * heightFactor;
 			L_pose_detected_.pose.position.x = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).x()/4/frameWidth-0.5)*z_position*magnifyFactor;
 			L_pose_detected_.pose.position.y = ((qtTopLeft + qtTopRight+ qtBottomLeft + qtBottomRight).y()/4/frameHeight-0.5)*z_position*magnifyFactor;
